@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb+srv://roxanarmoa:coderhouse@cluster0.p0ja74o.mongodb.net/E-commerce?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect(":)")
     .then(() => console.log("Conexión exitosa"))
-    .catch(() => console.log("Vamos a morir, tenemos un error"))
+    .catch(() => console.log("Error del servidor"))
     
