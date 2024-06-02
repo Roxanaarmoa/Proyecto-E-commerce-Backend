@@ -91,7 +91,7 @@ router.get("/profile", (req, res) => {
    // Verifica si el usuario está logueado
    if (!req.session.login) {
        // Redirige al formulario de login si no está logueado
-       return res.redirect("/login");
+      return res.redirect("/login");
    }
 
    // Renderiza la vista de perfil con los datos del usuario

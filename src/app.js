@@ -2,7 +2,9 @@ const express = require("express");
 const app = express();
 const exphbs = require("express-handlebars");
 const session = require("express-session");
-const PUERTO = 8080;
+const configObject = require ("./config/config.js");
+
+const { puerto } = configObject;
 require("./database.js");
 
 const productsRouter = require("./routes/products.router.js");
@@ -36,7 +38,7 @@ app.use("/api/sessions", sessionRouter);
 app.use("/", viewsRouter);
 
 
-app.listen(PUERTO, () => {
-    console.log(`Escuchando en el puerto http://localhost:${PUERTO}`);
+app.listen(puerto, () => {
+    console.log(`Escuchando en el puerto http://localhost:${puerto}`);
 });
 
