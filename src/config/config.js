@@ -3,7 +3,7 @@ const program = require ("../utils/commander.js");
 
 program.parse(process.argv);
 
-dotenv.config({ path: ".env.desarrollo" });
+dotenv.config({ path: ".env.produccion" });
 
 const configObject = {
     puerto: process.env.PUERTO,
