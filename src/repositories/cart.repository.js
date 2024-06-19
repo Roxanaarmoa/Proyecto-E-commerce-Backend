@@ -1,34 +1,33 @@
 const CartModel = require("../models/cart.model.js");
 
-class CartManager {
+class CartRepository {
     async crearCarrito() {
         try {
             const nuevoCarrito = new CartModel({ products: [] });
             await nuevoCarrito.save();
             return nuevoCarrito;
         } catch (error) {
-            console.log("Error al crear el nuevo carrinho de compriñas");
+            throw new Error("Error");
         }
     }
 
-    async getCarritoById(cartId) {
+    async obtenerProductosDeCarrito(idCarrito) {
         try {
-            const carrito = await CartModel.findById(cartId);
+            const carrito = await CartModel.findById(idCarrito);
             if (!carrito) {
                 console.log("No existe ese carrito con el id");
                 return null;
             }
-
             return carrito;
         } catch (error) {
-            console.log("Error al traer el carrito, fijate bien lo que haces", error);
+            throw new Error("Error");
         }
     }
 
-    async agregarProductoAlCarrito(cartId, productId, quantity = 1) {
+    async agregarProducto(cartId, productId, quantity = 1) {
         try {
-            const carrito = await this.getCarritoById(cartId);
-            const existeProducto = carrito.products.find(item => item.product.toString() === productId);
+            const carrito = await this.obtenerProductosDeCarrito(cartId);
+            const existeProducto = carrito.products.find(item => item.product._id.toString() === productId);
 
             if (existeProducto) {
                 existeProducto.quantity += quantity;
@@ -41,32 +40,26 @@ class CartManager {
 
             await carrito.save();
             return carrito;
-
         } catch (error) {
-            console.log("error al agregar un producto", error);
+            throw new Error("Error");
         }
     }
 
-    async eliminarProductoDelCarrito(cartId, productId) {
+    async eliminarProducto(cartId, productId) {
         try {
             const cart = await CartModel.findById(cartId);
-
             if (!cart) {
                 throw new Error('Carrito no encontrado');
             }
-            
             cart.products = cart.products.filter(item => item.product._id.toString() !== productId);
-
             await cart.save();
             return cart;
         } catch (error) {
-            console.error('Error al eliminar el producto del carrito en el gestor', error);
-            throw error;
+            throw new Error("Error");
         }
     }
 
-
-    async actualizarCarrito(cartId, updatedProducts) {
+    async actualizarProductosEnCarrito(cartId, updatedProducts) {
         try {
             const cart = await CartModel.findById(cartId);
 
@@ -77,26 +70,25 @@ class CartManager {
             cart.products = updatedProducts;
 
             cart.markModified('products');
-
             await cart.save();
-
             return cart;
         } catch (error) {
-            console.error('Error al actualizar el carrito en el gestor', error);
-            throw error;
+            throw new Error("Error");
         }
     }
 
-    async actualizarCantidadDeProducto(cartId, productId, newQuantity) {
+    async actualizarCantidadesEnCarrito(cartId, productId, newQuantity) {
         try {
             const cart = await CartModel.findById(cartId);
 
             if (!cart) {
+                
                 throw new Error('Carrito no encontrado');
             }
-
-            const productIndex = cart.products.findIndex(item => item.product._id.toString() === productId);
-
+            
+            
+            const productIndex = cart.products.findIndex(item => item._id.toString() === productId);
+        
             if (productIndex !== -1) {
                 cart.products[productIndex].quantity = newQuantity;
 
@@ -108,9 +100,9 @@ class CartManager {
             } else {
                 throw new Error('Producto no encontrado en el carrito');
             }
+
         } catch (error) {
-            console.error('Error al actualizar la cantidad del producto en el carrito', error);
-            throw error;
+            throw new Error("Error al actualizar las cantidades");
         }
     }
 
@@ -127,12 +119,14 @@ class CartManager {
             }
 
             return cart;
+
         } catch (error) {
-            console.error('Error al vaciar el carrito en el gestor', error);
-            throw error;
+            throw new Error("Error");
         }
     }
-
 }
 
-module.exports = CartManager; 
+module.exports = CartRepository;
+
+
+
