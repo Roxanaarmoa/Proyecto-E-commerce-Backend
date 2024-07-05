@@ -3,6 +3,7 @@ const CartRepository = require("../repositories/cart.repository.js");
 const cartRepository = new CartRepository();
 
 class ViewsController {
+    //Este método renderiza la página de productos.
     async renderProducts(req, res) {
         try {
             const { page = 1, limit = 3 } = req.query;
@@ -28,8 +29,8 @@ class ViewsController {
             });
 
 
-            const cartId = req.user.cart.toString();
-            //console.log(cartId);
+            const cartId = req.user && req.user.cart ? req.user.cart.toString() : null;
+            console.log(cartId);
 
             res.render("products", {
                 productos: nuevoArray,

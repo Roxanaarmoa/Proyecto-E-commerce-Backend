@@ -17,13 +17,14 @@ require("./database.js");
 const productsRouter = require("./routes/products.router.js");
 const cartsRouter = require("./routes/carts.router.js");
 const viewsRouter = require("./routes/views.router.js");
-const sessionRouter = require("./routes/session.router.js");
 const userRouter = require("./routes/user.router.js");
+const addLogger = require("./utils/logger.js");
 
 //Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(addLogger);
 app.use(cors());
 
 //Passport 
@@ -36,25 +37,28 @@ const authMiddleware = require("./middleware/authmiddleware.js");
 app.use(authMiddleware);
 
 
-//Session
-app.use(session({
-    secret:"secretCoder",
-    resave: true, 
-    saveUninitialized:true,   
-}))
-
 //Handlebars
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./src/views");
 
+//Ruta para testear winston:
+app.get("/loggertest", (req,res) => {
+    req.logger.http("mensaje HTTP");
+    req.logger.info("mensaje INFO");
+    req.logger.warning("mensaje WARNING");
+    req.logger.error("mensaje ERROR");
+    
+    res.send("logs generados")
+})
 
 //Rutas: 
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/users", userRouter);
-app.use("/api/sessions", sessionRouter);
 app.use("/", viewsRouter);
+
+
 
 //PUERTO
 const httpServer = app.listen(puerto, () => {

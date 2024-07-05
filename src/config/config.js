@@ -1,9 +1,11 @@
 const dotenv = require("dotenv");
 const program = require ("../utils/commander.js");
 
-program.parse(process.argv);
+const { mode } = program.opts(); 
 
-dotenv.config({ path: ".env.produccion" });
+dotenv.config({
+    path: mode === "produccion" ? "./.env.produccion":"./.env.desarrollo"
+});
 
 const configObject = {
     puerto: process.env.PUERTO,
