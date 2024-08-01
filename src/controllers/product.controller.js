@@ -7,7 +7,7 @@ class ProductController {
         const nuevoProducto = req.body;
         try {
             const resultado = await productRepository.agregarProducto(nuevoProducto);
-            res.json(resultado);
+            res.json(resultado); 
 
         } catch (error) {
             res.status(500).send("Error");

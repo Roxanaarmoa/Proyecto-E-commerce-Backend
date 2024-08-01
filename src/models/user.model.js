@@ -29,8 +29,13 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'usuario'],
+        //enumerar opciones validas
+        enum: ['admin', 'usuario','premium'],
         default: 'usuario'
+    },//para cambio de contraseña :
+    resetToken: {
+        token: String,
+        expire: Date
     }
 });
 

@@ -1,0 +1,295 @@
+paths:
+  /carts:
+    post:
+      summary: Crear un nuevo carrito
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Carrito creado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    description: ID del carrito creado
+                example:
+                  _id: "1234567890"
+        "500":
+          description: Error interno del servidor
+
+  /carts/{cid}:
+    get:
+      summary: Obtener productos del carrito por ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        "200":
+          description: Productos del carrito obtenidos correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductInCart"
+        "404":
+          description: Carrito no encontrado
+        "500":
+          description: Error interno del servidor
+
+    post:
+      summary: Agregar producto al carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto a agregar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  default: 1
+                  description: Cantidad del producto a agregar (opcional)
+      responses:
+        "200":
+          description: Producto agregado al carrito correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Producto agregado al carrito correctamente
+                  updatedCart:
+                    $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar productos en el carrito por ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProductInCart"
+      responses:
+        "200":
+          description: Productos del carrito actualizados correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+
+    delete:
+      summary: Vaciar el carrito por ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        "200":
+          description: Carrito vaciado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Todos los productos del carrito fueron eliminados correctamente
+                  updatedCart:
+                    $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+
+  /carts/{cid}/product/{pid}:
+    delete:
+      summary: Eliminar producto del carrito por IDs
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto a eliminar
+      responses:
+        "200":
+          description: Producto eliminado del carrito correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Producto eliminado del carrito correctamente
+                  updatedCart:
+                    $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar cantidad de producto en el carrito por IDs
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: Nueva cantidad del producto
+      responses:
+        "200":
+          description: Cantidad del producto actualizada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Cantidad del producto actualizada correctamente
+                  updatedCart:
+                    $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+
+  /carts/{cid}/purchase:
+    post:
+      summary: Finalizar compra del carrito por ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        "200":
+          description: Compra finalizada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productosNoDisponibles:
+                    type: array
+                    items:
+                      type: string
+                    example: ["1234567890"]
+        "500":
+          description: Error interno del servidor
+
+components:
+  schemas:
+    ProductInCart:
+      type: object
+      properties:
+        product:
+          type: string
+          description: ID del producto
+        quantity:
+          type: integer
+          description: Cantidad del producto en el carrito
+      example:
+        product: "1234567890"
+        quantity: 2
+
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID del carrito
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductInCart"
+      example:
+        _id: "0987654321"
+        products:
+          - product: "1234567890"
+            quantity: 2

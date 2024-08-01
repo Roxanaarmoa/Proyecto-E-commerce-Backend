@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 
+//clase que gestione todo el manejo y envio de email
 class EmailManager {
     constructor() {
         this.transporter = nodemailer.createTransport({

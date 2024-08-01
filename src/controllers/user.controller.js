@@ -3,6 +3,11 @@ const CartModel = require("../models/cart.model.js");
 const jwt = require("jsonwebtoken");
 const { createHash, isValidPassword } = require("../utils/hashbcryp.js");
 const UserDTO = require("../dto/user.dto.js");
+const { generarResetToken } = require("../utils/tokenreset.js");
+
+const EmailManager = require("../services/email.js");
+const emailManager = new EmailManager();
+
 
 class UserController {
     async register(req, res) {
@@ -66,8 +71,9 @@ class UserController {
                 maxAge: 3600000,
                 httpOnly: true
             });
-
+            
             res.redirect("/api/users/profile");
+
         } catch (error) {
             console.error(error);
             res.status(500).send("Error interno del servidor");
@@ -91,6 +97,91 @@ class UserController {
             return res.status(403).send("Acceso denegado");
         }
         res.render("admin");
+    }
+
+
+    async requestPasswordReset(req,res){
+        const {email} =req.body;
+        try {
+            //buscar al user por email
+            const user = await UserModel.findOne({email})
+            if(!user){
+                return res.status(404).send("Usuario no encontrado")
+            }
+            //Pero si hay usuario, le genero un token:
+            const token = generarResetToken();
+            //(carpeta utils)
+            //Una vez que tenemos el token se lo podemos agregar al usuario
+            user.resetToken = {
+                token: token,
+                expire: new Date(Date.now() + 3600000)//1 hora de duración
+            }
+            await user.save();
+
+            //Despues que guardamos los cambios, mandamos el mail
+            await emailManager.enviarCorreoRestablecimiento(email,user.first_name, token);
+
+            res.redirect("/confirmacion-envio")
+        } catch (error) {
+            res.status(500).send("Error interno del servidor")
+        }
+    }
+
+
+    
+    async resetPassword(req,res) {
+        const {email,password,token} =req.body;
+        try {
+            //Busco el user:
+            const user = await UserModel.findOne({email});
+            if(!user){
+                return res.render("passwordcambio",{error:"Usuario no encontrado"});
+            }
+            //Si hay user saco token y verifivco
+            const resetToken = user.resetToken;
+            if(!resetToken || resetToken.token !==token){
+                return res.render("passwordreset",{error:"El token es invalido"})
+            }
+            //verificamos si el token expiro:
+            const ahora = new Date();
+            if(ahora > resetToken.expire){
+                return res.render("passwordreset", {error:"El token es invalido"});
+            }
+            //verifivamos que la contraseña nueva no sea igual a la anterior:
+            if(isValidPassword(password,user)){
+                return res.render("passwordcambio", {error:"La nueva contraseña no puede ser igual a la anterior"});
+            }
+            //Actualizo la contraseña
+            user.password = createHash(password);
+
+            //marcamos como usado el token:
+            user.resetToken = undefined;
+            await user.save();
+
+            //enviar al login
+            return res.redirect("login");
+
+        } catch (error) {
+            res.status(500).render("passwordreset",{error:"Error interno del servidor"});
+        }
+    }
+    //cambiar el rol de user
+    async cambiarRolPremium(req,res){
+        const {uid} = req.params;
+        try {
+            //busco user:
+            const user = await UserModel.findById(uid);
+            if(!user){
+                return res.status(404).send("usuario no encontrado")
+            }
+            //si encuentro, cambio rol
+            const nuevoRol = user.role ==="usuario" ?"premium":"usuario";
+
+            const actualizado = await UserModel.findByIdAndUpdate(uid,{role:nuevoRol});
+            res.json(actualizado)
+        } catch (error) {
+            res.status(500).send("Error del servidor")
+        }
     }
 }
 

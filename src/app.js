@@ -9,6 +9,8 @@ const passport = require("passport");
 const initializePassport = require("./config/passport.config.js");
 const cors = require("cors");
 const path = require('path');
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUiExpress = require("swagger-ui-express");
 
 const { puerto } = configObject;
 require("./database.js");
@@ -52,11 +54,26 @@ app.get("/loggertest", (req,res) => {
     res.send("logs generados")
 })
 
+//Swagger Options:
+const swaggerOptions = {
+    definition:{
+        openapi: "3.0.1",
+        info: {
+            title: "Documentación de la App BikeStore",
+            description: "App dedicada a productos de bicicletas",
+        }
+    },
+    apis: ["./src/docs/**/*.yaml"] //lee el contenido de docs (** entra a las carpetas y contenidos.yaml)
+}
+//Cobnectamos swagger a nuestro servidor express
+const specs = swaggerJSDoc(swaggerOptions);
+
 //Rutas: 
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/users", userRouter);
 app.use("/", viewsRouter);
+app.use("/apidocs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
 
 
